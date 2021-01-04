@@ -1,13 +1,14 @@
 #!/bin/sh
 #find _b -iname '*.o' -delete
 #find _b -iname '*.so' -delete
-
-ANDROID_HOME=~/Library/Android/sdk
+if [ -z "$ANDROID_HOME" ]; then 
+				ANDROID_HOME=~/Library/Android/sdk
+fi 
 if [ ! -d $ANDROID_HOME ]; then 
-    ANDROID_HOME=~/android-sdk
+    ANDROID_HOME=~/android-sdks
 fi
 
-V=$(ls $ANDROID_HOME/ndk|tail -n1)
+TC=$(find $ANDROID_HOME/ndk -iname 'android.toolchain.cmake' |tail -n1)
 rm_cache() {
   rm -rf _b/$1/*Cache.txt
   rm -rf _b/$1/luajit/src/mluajit-stamp/mluajit-{done,install}
@@ -15,12 +16,12 @@ rm_cache() {
 set -e
 rm_cache android-arm
 echo ==============building android-aarch64 ==================
-cmake -B_b/android-arm -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_TOOLCHAIN_FILE=$ANDROID_HOME/ndk/$V/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-30
+cmake -B_b/android-arm -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_TOOLCHAIN_FILE=$TC -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=android-21
 cmake --build _b/android-arm
 echo ==============building android-x86_64 ==================
 
 rm_cache android-x86
-cmake -B_b/android-x86 -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_TOOLCHAIN_FILE=$ANDROID_HOME/ndk/$V/build/cmake/android.toolchain.cmake -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-30
+cmake -B_b/android-x86 -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_TOOLCHAIN_FILE=$TC  -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-21
 cmake --build _b/android-x86 
 
 echo ==============building ios arm64 ==================
